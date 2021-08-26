@@ -1,0 +1,11 @@
+server:
+  error:
+    include-message: always
+management:
+  server:
+    port: 8089
+  endpoints:
+    web:
+      exposure:
+        include: info,health,metrics,mappings
+

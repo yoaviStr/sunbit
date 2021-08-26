@@ -1,0 +1,7 @@
+.*/
+!.mvn/
+out/
+build/
+/deployment/
+target/
+*.iml

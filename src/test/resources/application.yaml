@@ -1,0 +1,7 @@
+server:
+  error:
+    include-message: always
+
+spring:
+  main:
+    banner-mode: off
