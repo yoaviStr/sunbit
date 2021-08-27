@@ -15,59 +15,59 @@ import java.util.stream.Collectors;
 @Log4j2
 public class ContactService {
 
-  private final Trie<String, Map<Long, Contact>> contactTireByName;
-  private final MyKeyValueStorage<Contact> myKeyValueStorage;
+    private final Trie<String, Map<Long, Contact>> contactTireByName;
+    private final MyKeyValueStorage<Contact> myKeyValueStorage;
 
-  public ContactService(
-      Trie<String, Map<Long, Contact>> contactTireByName, MyKeyValueStorage myKeyValueStorage) {
-    this.contactTireByName = contactTireByName;
-    this.myKeyValueStorage = myKeyValueStorage;
-  }
-
-  public Contact createContact(Contact contact) {
-    Contact createdContact = myKeyValueStorage.createContact(contact);
-    addContactToTire(createdContact);
-    return contact;
-  }
-
-  public Contact updateContact(Contact contact) {
-    Contact oldContact = myKeyValueStorage.getContactById(contact.getId());
-    removeContactFromTire(oldContact);
-    myKeyValueStorage.updateContact(contact.getId(), contact);
-    addContactToTire(contact);
-    return contact;
-  }
-
-  public void removeContact(Long id) {
-    Contact contactById = myKeyValueStorage.getContactById(id);
-    removeContactFromTire(contactById);
-    myKeyValueStorage.removeContactById(id);
-  }
-
-  private void removeContactFromTire(Contact contact) {
-    Map<Long, Contact> contactsMap = contactTireByName.get(contact.getName());
-    contactsMap.remove(contact.getId(),contact);
-    if (CollectionUtils.isEmpty(contactsMap)) {
-      contactTireByName.remove(contact.getName());
+    public ContactService(
+            Trie<String, Map<Long, Contact>> contactTireByName, MyKeyValueStorage myKeyValueStorage) {
+        this.contactTireByName = contactTireByName;
+        this.myKeyValueStorage = myKeyValueStorage;
     }
-  }
 
-  public Contact readContact(long contactId) {
-    return myKeyValueStorage.getContactById(contactId);
-  }
-
-  public List<Contact> readByPrefix(String prefix) {
-    return contactTireByName.prefixedByValues(prefix, true).stream()
-        .flatMap((coll) -> coll.values().stream())
-        .collect(Collectors.toList());
-  }
-
-  private void addContactToTire(Contact contact) {
-    Map<Long, Contact> contactsMap = contactTireByName.get(contact.getName());
-    if (CollectionUtils.isEmpty(contactsMap)) {
-      contactsMap = new HashMap<>();
-      contactTireByName.put(contact.getName(), contactsMap);
+    public Contact createContact(Contact contact) {
+        Contact createdContact = myKeyValueStorage.createContact(contact);
+        addContactToTire(createdContact);
+        return contact;
     }
-    contactsMap.put(contact.getId(), contact);
-  }
+
+    public Contact updateContact(Contact contact) {
+        Contact oldContact = myKeyValueStorage.getContactById(contact.getId());
+        removeContactFromTire(oldContact);
+        myKeyValueStorage.updateContact(contact.getId(), contact);
+        addContactToTire(contact);
+        return contact;
+    }
+
+    public void removeContact(Long id) {
+        Contact contactById = myKeyValueStorage.getContactById(id);
+        removeContactFromTire(contactById);
+        myKeyValueStorage.removeContactById(id);
+    }
+
+    private void removeContactFromTire(Contact contact) {
+        Map<Long, Contact> contactsMap = contactTireByName.get(contact.getName());
+        contactsMap.remove(contact.getId(), contact);
+        if (CollectionUtils.isEmpty(contactsMap)) {
+            contactTireByName.remove(contact.getName());
+        }
+    }
+
+    public Contact readContact(long contactId) {
+        return myKeyValueStorage.getContactById(contactId);
+    }
+
+    public List<Contact> readByPrefix(String prefix) {
+        return contactTireByName.prefixedByValues(prefix, true).stream()
+                .flatMap((coll) -> coll.values().stream())
+                .collect(Collectors.toList());
+    }
+
+    private void addContactToTire(Contact contact) {
+        Map<Long, Contact> contactsMap = contactTireByName.get(contact.getName());
+        if (CollectionUtils.isEmpty(contactsMap)) {
+            contactsMap = new HashMap<>();
+            contactTireByName.put(contact.getName(), contactsMap);
+        }
+        contactsMap.put(contact.getId(), contact);
+    }
 }
