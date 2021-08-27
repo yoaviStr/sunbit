@@ -34,13 +34,13 @@ public class ContactController {
   }
 
   @PostMapping
-  public ResponseEntity createContact(
+  public ResponseEntity create(
       @RequestBody @Validated(value = {CreateGroup.class}) Contact contact) {
-    return new ResponseEntity<>(contactService.createContact(contact), HttpStatus.CREATED);
+    return new ResponseEntity<>(contactService.create(contact), HttpStatus.CREATED);
   }
 
   @PutMapping("/{contactId}")
-  public ResponseEntity<Contact> updateContact(
+  public ResponseEntity<Contact> update(
       @PathVariable(value = "contactId") long contactId,
       @RequestBody
           @Validated(value = {UpdateGroup.class})
@@ -48,21 +48,21 @@ public class ContactController {
           Contact contact) {
     if (hasContactIdMismatch(contactId, contact)) return ResponseEntity.badRequest().build();
 
-    return new ResponseEntity<>(contactService.updateContact(contact), HttpStatus.OK);
+    return new ResponseEntity<>(contactService.update(contact), HttpStatus.OK);
   }
 
   @DeleteMapping("/{contactId}")
   public ResponseEntity delete(@PathVariable(value = "contactId") long contactId) {
-    contactService.removeContact(contactId);
+    contactService.remove(contactId);
     return new ResponseEntity("deleted contactId successfully", HttpStatus.NO_CONTENT);
   }
 
   @GetMapping("/{contactId}")
-  public ResponseEntity<Contact> readContact(@PathVariable(value = "contactId") long contactId) {
-    return new ResponseEntity<>(contactService.readContact(contactId), HttpStatus.OK);
+  public ResponseEntity<Contact> read(@PathVariable(value = "contactId") long contactId) {
+    return new ResponseEntity<>(contactService.get(contactId), HttpStatus.OK);
   }
-  //
-  //  // paging ?
+
+  // paging ?
     @GetMapping
     public ResponseEntity<List<Contact>> readContactByPrefix(
         @RequestParam("contactPrefix") String contactPrefix) {
@@ -72,4 +72,5 @@ public class ContactController {
   private boolean hasContactIdMismatch(long contactId, Contact contact) {
     return ((contact.getId() == null) || (!contact.getId().equals(contactId)));
   }
+
 }

@@ -24,13 +24,13 @@ public class ContactService {
         this.myKeyValueStorage = myKeyValueStorage;
     }
 
-    public Contact createContact(Contact contact) {
+    public Contact create(Contact contact) {
         Contact createdContact = myKeyValueStorage.createContact(contact);
         addContactToTire(createdContact);
         return contact;
     }
 
-    public Contact updateContact(Contact contact) {
+    public Contact update(Contact contact) {
         Contact oldContact = myKeyValueStorage.getContactById(contact.getId());
         removeContactFromTire(oldContact);
         myKeyValueStorage.updateContact(contact.getId(), contact);
@@ -38,7 +38,11 @@ public class ContactService {
         return contact;
     }
 
-    public void removeContact(Long id) {
+    public Contact get(long contactId) {
+        return myKeyValueStorage.getContactById(contactId);
+    }
+
+    public void remove(Long id) {
         Contact contactById = myKeyValueStorage.getContactById(id);
         removeContactFromTire(contactById);
         myKeyValueStorage.removeContactById(id);
@@ -50,10 +54,6 @@ public class ContactService {
         if (CollectionUtils.isEmpty(contactsMap)) {
             contactTireByName.remove(contact.getName());
         }
-    }
-
-    public Contact readContact(long contactId) {
-        return myKeyValueStorage.getContactById(contactId);
     }
 
     public List<Contact> readByPrefix(String prefix) {

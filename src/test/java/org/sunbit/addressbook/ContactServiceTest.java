@@ -42,7 +42,7 @@ class ContactServiceTest {
         when(myKeyValueStorage.createContact(input)).thenReturn(expected1);
         when(contactTireByName.get(input.getName())).thenReturn(null);
 
-        contactService.createContact(input);
+        contactService.create(input);
 
         verify(myKeyValueStorage, times(1)).createContact(input);
         verify(contactTireByName)
@@ -69,7 +69,7 @@ class ContactServiceTest {
                                         1L, Contact.builder().name("Dodo").phoneNumber("9992357223").id(1L).build());
                             }
                         });
-        contactService.createContact(input);
+        contactService.create(input);
         verify(myKeyValueStorage).createContact(input);
         verifyNoMoreInteractions(contactTireByName);
     }
@@ -92,7 +92,7 @@ class ContactServiceTest {
         when(myKeyValueStorage.getContactById(1L)).thenReturn(contactToReplace);
         when(contactTireByName.get(contactToReplace.getName())).thenReturn(map);
 
-        contactService.updateContact(input);
+        contactService.update(input);
         assertThat(map.size()).isEqualTo(2);
 
     }
@@ -111,7 +111,7 @@ class ContactServiceTest {
         when(myKeyValueStorage.getContactById(contactToReplace.getId())).thenReturn(contactToReplace);
         when(contactTireByName.get(contactToReplace.getName())).thenReturn(valueToReplaceMap);
 
-        contactService.updateContact(input);
+        contactService.update(input);
 
         verify(contactTireByName).remove(contactToReplace.getName());
         verify(contactTireByName)
@@ -135,7 +135,7 @@ class ContactServiceTest {
                 .getContactById(contactToReplace.getId());
 
         Assertions.assertThrows(
-                ResourceNotFoundException.class, () -> contactService.updateContact(contactToReplace));
+                ResourceNotFoundException.class, () -> contactService.update(contactToReplace));
     }
 
     @Test
@@ -154,7 +154,7 @@ class ContactServiceTest {
         when(myKeyValueStorage.getContactById(1L)).thenReturn(contactToDelete);
         when(contactTireByName.get(contactToDelete.getName())).thenReturn(map);
 
-        contactService.removeContact(1L);
+        contactService.remove(1L);
 
         verify(myKeyValueStorage).removeContactById(1L);
 
@@ -166,7 +166,7 @@ class ContactServiceTest {
     void deleteContact_contactDoesNotExist() {
         doThrow(new ResourceNotFoundException("")).when(myKeyValueStorage).getContactById(1L);
         Assertions.assertThrows(
-                ResourceNotFoundException.class, () -> contactService.removeContact(1L));
+                ResourceNotFoundException.class, () -> contactService.remove(1L));
     }
 
     @Test
@@ -176,7 +176,7 @@ class ContactServiceTest {
 
         when(myKeyValueStorage.getContactById(1L)).thenReturn(readContactById);
 
-        Contact contact = contactService.readContact(1L);
+        Contact contact = contactService.get(1L);
 
         verify(myKeyValueStorage).getContactById(1L);
         assertEquals(contact, readContactById);
@@ -187,7 +187,7 @@ class ContactServiceTest {
     void readById_ItemDoesNotExist() {
         doThrow(new ResourceNotFoundException("")).when(myKeyValueStorage).getContactById(1L);
         Assertions.assertThrows(
-                ResourceNotFoundException.class, () -> contactService.readContact(1L));
+                ResourceNotFoundException.class, () -> contactService.get(1L));
     }
 
     @Test
