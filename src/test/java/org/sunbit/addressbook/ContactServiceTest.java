@@ -18,7 +18,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -35,32 +34,33 @@ class ContactServiceTest {
 
     @Test
     @DisplayName("create contact ")
-    void createContact() {
-        Contact expected1 = Contact.builder().name("Dodo").phoneNumber("0542357223").id(1L).build();
+    void create() {
+        Contact expected = Contact.builder().name("Dodo").phoneNumber("0542357223").id(1L).build();
         Contact input = Contact.builder().name("Dodo").phoneNumber("0542357223").build();
 
-        when(myKeyValueStorage.createContact(input)).thenReturn(expected1);
+        when(myKeyValueStorage.create(input)).thenReturn(expected);
         when(contactTireByName.get(input.getName())).thenReturn(null);
 
-        contactService.create(input);
+        Contact contact = contactService.create(input);
 
-        verify(myKeyValueStorage, times(1)).createContact(input);
+        verify(myKeyValueStorage).create(input);
         verify(contactTireByName)
                 .put(
-                        expected1.getName(),
+                        expected.getName(),
                         new HashMap<>() {
                             {
-                                this.put(expected1.getId(), expected1);
+                                this.put(expected.getId(), expected);
                             }
                         });
+        assertThat(contact).isEqualTo(expected);
     }
 
     @Test
-    void createContact_duplicateName_twoContactsShouldExist() {
+    void create_duplicateName_twoContactsShouldExist() {
         Contact expected = Contact.builder().name("Dodo").phoneNumber("0542357223").id(2L).build();
         Contact input = Contact.builder().name("Dodo").phoneNumber("0542357223").build();
 
-        when(myKeyValueStorage.createContact(input)).thenReturn(expected);
+        when(myKeyValueStorage.create(input)).thenReturn(expected);
         when(contactTireByName.get(input.getName()))
                 .thenReturn(
                         new HashMap<>() {
@@ -69,13 +69,16 @@ class ContactServiceTest {
                                         1L, Contact.builder().name("Dodo").phoneNumber("9992357223").id(1L).build());
                             }
                         });
-        contactService.create(input);
-        verify(myKeyValueStorage).createContact(input);
+        Contact contact = contactService.create(input);
+
+        verify(myKeyValueStorage).create(input);
         verifyNoMoreInteractions(contactTireByName);
+        assertThat(contact).isEqualTo(expected);
+
     }
 
     @Test
-    void updateContact_differentPhoneNumber() {
+    void update_differentPhoneNumber() {
         Contact contactToReplace =
                 Contact.builder().name("Dodo").phoneNumber("0542351234").id(1L).build();
         Contact existingContact =
@@ -89,16 +92,17 @@ class ContactServiceTest {
                     }
                 };
 
-        when(myKeyValueStorage.getContactById(1L)).thenReturn(contactToReplace);
+        when(myKeyValueStorage.getById(1L)).thenReturn(contactToReplace);
         when(contactTireByName.get(contactToReplace.getName())).thenReturn(map);
 
-        contactService.update(input);
-        assertThat(map.size()).isEqualTo(2);
+        Contact update = contactService.update(input);
 
+        assertThat(map.size()).isEqualTo(2);
+        assertThat(update).isEqualTo(input);
     }
 
     @Test
-    void updateContact_differentName() {
+    void update_differentName() {
         Contact contactToReplace =
                 Contact.builder().name("Dodo").phoneNumber("0542351234").id(1L).build();
         Contact input = Contact.builder().name("notDodo").phoneNumber("0542357223").id(1L).build();
@@ -108,10 +112,10 @@ class ContactServiceTest {
                         this.put(contactToReplace.getId(), contactToReplace);
                     }
                 };
-        when(myKeyValueStorage.getContactById(contactToReplace.getId())).thenReturn(contactToReplace);
+        when(myKeyValueStorage.getById(contactToReplace.getId())).thenReturn(contactToReplace);
         when(contactTireByName.get(contactToReplace.getName())).thenReturn(valueToReplaceMap);
 
-        contactService.update(input);
+        Contact update = contactService.update(input);
 
         verify(contactTireByName).remove(contactToReplace.getName());
         verify(contactTireByName)
@@ -122,24 +126,25 @@ class ContactServiceTest {
                                 this.put(input.getId(), input);
                             }
                         });
+        assertThat(update).isEqualTo(input);
         assertThat(valueToReplaceMap.size()).isEqualTo(0);
     }
 
     @Test
-    void updateContact_contactDoesNotExist() {
+    void update_contactDoesNotExist() {
         Contact contactToReplace =
                 Contact.builder().name("Dodo").phoneNumber("0542351234").id(1L).build();
 
         doThrow(new ResourceNotFoundException(""))
                 .when(myKeyValueStorage)
-                .getContactById(contactToReplace.getId());
+                .getById(contactToReplace.getId());
 
         Assertions.assertThrows(
                 ResourceNotFoundException.class, () -> contactService.update(contactToReplace));
     }
 
     @Test
-    void deleteContact() {
+    void delete() {
         Contact contactToDelete =
                 Contact.builder().name("Dodo").phoneNumber("0542351234").id(1L).build();
         Contact existingContact =
@@ -151,20 +156,18 @@ class ContactServiceTest {
                         this.put(existingContact.getId(), existingContact);
                     }
                 };
-        when(myKeyValueStorage.getContactById(1L)).thenReturn(contactToDelete);
+        when(myKeyValueStorage.getById(1L)).thenReturn(contactToDelete);
         when(contactTireByName.get(contactToDelete.getName())).thenReturn(map);
 
         contactService.remove(1L);
 
-        verify(myKeyValueStorage).removeContactById(1L);
-
+        verify(myKeyValueStorage).removeById(1L);
         assertThat(map.size()).isEqualTo(1);
-
     }
 
     @Test
-    void deleteContact_contactDoesNotExist() {
-        doThrow(new ResourceNotFoundException("")).when(myKeyValueStorage).getContactById(1L);
+    void delete_contactDoesNotExist() {
+        doThrow(new ResourceNotFoundException("")).when(myKeyValueStorage).getById(1L);
         Assertions.assertThrows(
                 ResourceNotFoundException.class, () -> contactService.remove(1L));
     }
@@ -174,24 +177,24 @@ class ContactServiceTest {
         Contact readContactById =
                 Contact.builder().name("Dodo").phoneNumber("0542351234").id(1L).build();
 
-        when(myKeyValueStorage.getContactById(1L)).thenReturn(readContactById);
+        when(myKeyValueStorage.getById(1L)).thenReturn(readContactById);
 
         Contact contact = contactService.get(1L);
 
-        verify(myKeyValueStorage).getContactById(1L);
+        verify(myKeyValueStorage).getById(1L);
         assertEquals(contact, readContactById);
         assertThat(readContactById).isEqualTo(contact);
     }
 
     @Test
     void readById_ItemDoesNotExist() {
-        doThrow(new ResourceNotFoundException("")).when(myKeyValueStorage).getContactById(1L);
+        doThrow(new ResourceNotFoundException("")).when(myKeyValueStorage).getById(1L);
         Assertions.assertThrows(
                 ResourceNotFoundException.class, () -> contactService.get(1L));
     }
 
     @Test
-    void readByPrefix_ItemDoesNotExist() {
+    void readByPrefix() {
         Contact expected1 = Contact.builder().name("Dodo").phoneNumber("0542357223").id(1L).build();
         Contact expected2 = Contact.builder().name("Dodo1").phoneNumber("0542357223").id(2L).build();
 
@@ -207,9 +210,17 @@ class ContactServiceTest {
 
         List<Contact> list = contactService.readByPrefix("Dodo");
         assertThat(list.size()).isEqualTo(2);
-
     }
 
+    @Test
+    void readByPrefix_emptyResult() {
+        ArrayList<HashMap<Long, Contact>> maps = new ArrayList<>();
+
+        when(contactTireByName.prefixedByValues("Dodo", true)).thenReturn(maps);
+
+        List<Contact> list = contactService.readByPrefix("Dodo");
+        assertThat(list.size()).isEqualTo(0);
+    }
 
 }
 

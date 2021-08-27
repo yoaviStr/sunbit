@@ -25,27 +25,27 @@ public class ContactService {
     }
 
     public Contact create(Contact contact) {
-        Contact createdContact = myKeyValueStorage.createContact(contact);
+        Contact createdContact = myKeyValueStorage.create(contact);
         addContactToTire(createdContact);
-        return contact;
+        return createdContact;
     }
 
     public Contact update(Contact contact) {
-        Contact oldContact = myKeyValueStorage.getContactById(contact.getId());
+        Contact oldContact = myKeyValueStorage.getById(contact.getId());
         removeContactFromTire(oldContact);
-        myKeyValueStorage.updateContact(contact.getId(), contact);
+        myKeyValueStorage.update(contact.getId(), contact);
         addContactToTire(contact);
         return contact;
     }
 
     public Contact get(long contactId) {
-        return myKeyValueStorage.getContactById(contactId);
+        return myKeyValueStorage.getById(contactId);
     }
 
     public void remove(Long id) {
-        Contact contactById = myKeyValueStorage.getContactById(id);
+        Contact contactById = myKeyValueStorage.getById(id);
         removeContactFromTire(contactById);
-        myKeyValueStorage.removeContactById(id);
+        myKeyValueStorage.removeById(id);
     }
 
     private void removeContactFromTire(Contact contact) {

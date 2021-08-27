@@ -2,7 +2,7 @@ package org.sunbit.addressbook;
 
 import org.springframework.stereotype.Component;
 import org.sunbit.addressbook.exception.ResourceNotFoundException;
-import org.sunbit.addressbook.model.Contact;
+import org.sunbit.addressbook.model.BaseEntity;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,28 +10,28 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Component
-public class MyKeyValueStorage<V extends Contact> {
+public class MyKeyValueStorage<V extends BaseEntity> {
 
-    Map<Long, V> m = new HashMap<>();
-    AtomicLong generator = new AtomicLong(1);
+    private Map<Long, V> m = new HashMap<>();
+    private AtomicLong generator = new AtomicLong(1L);
 
-    public V getContactById(Long id) {
+    public V getById(Long id) {
         return Optional.ofNullable(m.get(id))
                 .orElseThrow(() -> new ResourceNotFoundException("contact id " + id));
     }
 
-    public V createContact(V c) {
+    public V create(V c) {
         Long andIncrement = generator.getAndIncrement();
         c.setId(andIncrement);
         m.put(andIncrement, c);
         return c;
     }
 
-    public V removeContactById(Long id) {
+    public V removeById(Long id) {
         return m.remove(id);
     }
 
-    public V updateContact(Long id, V c) {
+    public V update(Long id, V c) {
         return m.put(id, c);
     }
 

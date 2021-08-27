@@ -3,6 +3,7 @@ package org.sunbit.addressbook.model;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.sunbit.addressbook.validator.CreateGroup;
 import org.sunbit.addressbook.validator.UpdateGroup;
 
@@ -13,9 +14,8 @@ import javax.validation.constraints.Null;
 @Data
 @Builder
 @AllArgsConstructor
-public class Contact {
-
-  public Contact() {}
+@NoArgsConstructor
+public class Contact implements BaseEntity{
 
   @NotNull(groups = UpdateGroup.class, message = "id should not be empty")
   @Null(groups = CreateGroup.class, message = "id should be empty")
