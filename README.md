@@ -8,6 +8,7 @@
 | MyKeyValueStorage   |  unit test |
 | ContactServiceTest   |  do validation work |
 | ContactController   |  pagging |
+| ContactController |  lack some tests ... |
 
 
 
